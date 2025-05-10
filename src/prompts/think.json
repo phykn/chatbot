@@ -1,0 +1,22 @@
+{
+    "name": "thinking_mode",
+    "description": "Activates a detailed thinking process when triggered",
+    "triggers": {
+        "activate": "/think",
+        "deactivate": "/no_think"
+    },
+    "process": [
+        {
+            "step": "intent_analysis", 
+            "task": "Identify core request, context, and underlying needs"
+        },
+        {
+            "step": "language_review",
+            "task": "Check if response matches user's linguistic style and cultural context"
+        },
+        {
+            "step": "content_refinement",
+            "task": "Correct and improve accuracy, clarity, and coherence"
+        }
+    ]
+}
