@@ -34,7 +34,7 @@ simple-chatbot/
 ```
 
 ## Example
-![image]("example/figure.jpg")
+![image](example/figure.jpg)
 
 ## Planned Development
 - MCP Server Integration
