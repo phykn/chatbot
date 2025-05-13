@@ -66,13 +66,13 @@ with gr.Blocks(title = "Simple Chatbot") as demo:
     )
 
     do_think.change(
-        fn = lambda obj, value: update_obj(obj=obj, key="model", value=value),
+        fn = lambda obj, value: update_obj(obj=obj, key="do_think", value=value),
         inputs = [option, do_think],
         outputs = option
     )
 
     max_token.change(
-        fn = lambda obj, value: update_obj(obj=obj, key="model", value=value),
+        fn = lambda obj, value: update_obj(obj=obj, key="max_token", value=value),
         inputs = [option, max_token],
         outputs = option
     )
