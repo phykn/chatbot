@@ -1,66 +1,36 @@
-import uuid
 import gradio as gr
-from src.event import user, assistant
-from src.config import option_init, model_table
+from src.event import user, assistant, update_obj
+from src.uuid import UUID, update_uuid
+from src.misc import load_yaml
 
 
-class State:
-    def __init__(self):
-        self.msg_id = str(uuid.uuid4())
-    
-    def __hash__(self):
-        return hash(self.msg_id)
-    
-def update_state(state):
-    state.msg_id = str(uuid.uuid4())
-
-def update_option(options: dict, key: str, value: any):
-    options[key] = value
-    return options
+cfg = load_yaml("src/config/front.yaml")
 
 
 with gr.Blocks(title = "Simple Chatbot") as demo:
-    option = gr.State(option_init)
-    state = gr.State(State())
+    option = gr.State(cfg["option"])
+    uuid = gr.State(UUID())
 
-    with gr.Sidebar(open=False):
+    with gr.Sidebar(open = True):
         model = gr.Dropdown(
             label = "Model",
-            choices = list(model_table.keys()),
-            value = option_init["model"],
+            choices = cfg["model"].keys(),
+            value = cfg["option"]["model"],
             interactive = True
         )
 
         do_think = gr.Dropdown(
             label = "Thinking",
-            choices = [None, False, True],
-            value = option_init["do_think"],
+            choices = [False, True],
+            value = cfg["option"]["do_think"],
             interactive = True
         )
 
         max_token = gr.Dropdown(
             label = "Maximum Token Limit",
             choices = [1024, 2048, 4096, 8192],
-            value = option_init["max_token"],
+            value = cfg["option"]["max_token"],
             interactive = True
-        )
-
-        model.change(
-            fn = lambda option, value: update_option(option, "model", value),
-            inputs = [option, model],
-            outputs = option
-        )
-
-        do_think.change(
-            fn = lambda option, value: update_option(option, "do_think", value),
-            inputs = [option, do_think],
-            outputs = option
-        )
-
-        max_token.change(
-            fn = lambda option, value: update_option(option, "max_token", value),
-            inputs = [option, max_token],
-            outputs = option
         )
 
     history = gr.Chatbot(
@@ -88,35 +58,46 @@ with gr.Blocks(title = "Simple Chatbot") as demo:
 
     clear_btn = gr.Button("Clear")
 
+
+    model.change(
+        fn = lambda obj, value: update_obj(obj=obj, key="model", value=value),
+        inputs = [option, model],
+        outputs = option
+    )
+
+    do_think.change(
+        fn = lambda obj, value: update_obj(obj=obj, key="model", value=value),
+        inputs = [option, do_think],
+        outputs = option
+    )
+
+    max_token.change(
+        fn = lambda obj, value: update_obj(obj=obj, key="model", value=value),
+        inputs = [option, max_token],
+        outputs = option
+    )
+
     user_input.submit(
         fn = user,
         inputs = [history, user_input],
-        outputs = [history, user_input],
-        queue = False
+        outputs = [history, user_input]
     ).then(
         fn = assistant,
-        inputs = [history, option, state],
+        inputs = [history, option, uuid],
         outputs = history,
         queue = True
     )
 
     stop_btn.click(
-        fn = update_state,
-        inputs = [state],
-        queue = False
+        fn = update_uuid,
+        inputs = [uuid]
     )
 
     clear_btn.click(
-        fn = lambda: [], 
-        inputs = None, 
-        outputs = history, 
-        queue = False
+        fn = lambda: [],
+        outputs = history,
     )
 
 
 if __name__ == "__main__":
-    demo.launch(
-        server_name = "localhost",
-        server_port = 8081,
-        share = False
-    )
+    demo.launch(**cfg["launch"])

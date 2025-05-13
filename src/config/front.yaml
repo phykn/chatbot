@@ -1,0 +1,24 @@
+launch:
+  server_name: "localhost"
+  server_port: 8081
+  share: False
+
+option:
+  model: "Qwen3:8B"
+  do_think: false
+  max_token: 1024
+  
+model:
+  "Qwen3:8B":
+    endpoint: "qwen3:8b"
+    is_think: true
+    is_vision: false    
+    extensions:
+      - think
+
+  "Qwen3:30B":
+    endpoint: "qwen3:30b"
+    is_think: true
+    is_vision: false
+    extensions:
+      - "think"

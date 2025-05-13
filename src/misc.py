@@ -1,4 +1,5 @@
 import json
+import yaml
 
 
 def exists(x):
@@ -6,8 +7,14 @@ def exists(x):
 
 
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as file:
-        data = json.load(file)
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data
+
+
+def load_yaml(path):
+    with open(path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
     return data
 
 

@@ -4,7 +4,7 @@ from typing import List, Optional
 from .misc import exists
 
 
-def stream_chat(
+def stream_post(
     url: str, 
     model: str, 
     messages: List[str], 
