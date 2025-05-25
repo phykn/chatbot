@@ -92,4 +92,4 @@ def slice_messages(
 
     selected_messages.reverse()
 
-    return system_messages, chat_messages
+    return system_messages, selected_messages
