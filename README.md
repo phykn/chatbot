@@ -1,5 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
-
 # MCP-Powered AI Chatbot with Web Search
 
 This project is an AI chatbot system with web search capabilities utilizing **MCP (Model Context Protocol)**. When users ask questions, the AI searches for the latest information from the internet as needed and provides answers as an AI assistant. **The web interface is implemented with Gradio** to provide a user-friendly conversational interface without requiring complex web development knowledge.
