@@ -1,0 +1,16 @@
+server:
+  model: "Qwen3-4B"
+  openai_api_base: "http://localhost:8000/v1"
+  openai_api_key: "EMPTY"
+  temperature: 0.6
+  top_p: 0.95
+  frequency_penalty: 1
+
+stop:
+  - "<|im_start|>"
+  - "<|im_end|>"
+
+max_input_tokens: 8192
+
+extensions:
+  - "web_search"
