@@ -1,8 +1,0 @@
-summary:
-  max_tokens: 2048
-  summary_words: 300
-
-ddg:
-  region: "kr-kr"
-  num_content: 3
-  max_try: 5

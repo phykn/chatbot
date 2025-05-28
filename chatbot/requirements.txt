@@ -1,0 +1,10 @@
+fastmcp
+gradio
+langchain
+langchain-openai
+langchain-mcp-adapters
+duckduckgo-search
+beautifulsoup4
+requests
+PyYAML
+transformers

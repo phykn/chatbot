@@ -1,0 +1,7 @@
+server:
+  host: "localhost"
+  port: 8002
+  transport: "sse"
+
+summary:
+  summary_words: 500
