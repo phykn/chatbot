@@ -1,10 +1,21 @@
 from transformers import AutoTokenizer
-from .misc import load_yaml
+from .misc import load_yaml, build_system_message
 
 cfg_llm = load_yaml("src/config/llm.yaml")
+
 cfg_mcp = load_yaml("src/config/mcp.yaml")
 
 tokenizer = AutoTokenizer.from_pretrained(cfg_llm["tokenizer"])
+
+system_prompt_think = build_system_message(
+    do_think = True,
+    extension_names = cfg_llm.get("extensions", [])
+)
+
+system_prompt_no_think = build_system_message(
+    do_think = False,
+    extension_names = cfg_llm.get("extensions", [])
+)
 
 CSS_AVATAR = """
 .gradio-container {

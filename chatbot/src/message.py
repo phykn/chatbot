@@ -1,11 +1,8 @@
-from datetime import datetime
 from functools import partial
-
 from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langchain_core.messages import SystemMessage
 from .config import cfg_llm, cfg_mcp
-from .misc import exists, load_text, build_mcp_url
+from .misc import exists, build_mcp_url
 
 
 async def init_astream():
@@ -24,19 +21,6 @@ async def init_astream():
     llm_tool_astream = partial(llm_tool.astream, stop=cfg_llm["stop"])
 
     return llm_astream, llm_tool_astream
-
-
-def build_system_message(do_think=False) -> SystemMessage:
-    main = load_text("src/prompt/main.txt")
-    time = f"**Current Time:**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-
-    extension_names = cfg_llm.get("extensions", [])
-    extensions = [load_text(f"src/prompt/{name}.txt") for name in extension_names]
-
-    mode = f"**Mode:**: {'/think' if do_think else '/no_think'}" 
-
-    content = "\n\n".join([main, time] + extensions + [mode])
-    return SystemMessage(content=content)
 
 
 class StreamHandler:

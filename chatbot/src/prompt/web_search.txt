@@ -1,11 +1,6 @@
-**Web Search Keywords:**
-Generate optimized search terms by analyzing:
-- **Chat History Context**: Review previous conversation turns to understand ongoing topics and user intent
-- **User Query Analysis**: Extract core concepts, entities, and intent from current question
-- **Contextual Enhancement**: Combine chat history insights with current query to create comprehensive keywords
-- **Search Optimization**: Transform conversational language to search-friendly terms including:
-  * Official terminology and proper nouns
-  * Temporal markers (year, "latest", "current") for time-sensitive queries
-  * Location context when relevant
-  * Multiple keyword variations for comprehensive coverage
-- **Relevance Filtering**: Prioritize keywords that directly address user's information needs based on conversation flow
+**Web Search Protocol:**
+- Use web search when current information is needed; otherwise answer from existing knowledge
+- Generate optimized keywords by analyzing chat history, user intent, and time sensitivity
+- Make individual tool calls for each distinct search purpose
+- Prioritize reliable sources and combine multiple search results when available
+- If web search fails or returns inadequate results, respond using available knowledge and clearly indicate limitations

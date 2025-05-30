@@ -18,20 +18,34 @@ async def run_tool(name: str, arguments: dict):
 
 async def stream_summary(
         llm_astream, 
-        text: str, 
-        summary_words: int = 300
-    ):  
+        text: str,
+        max_len: int = 2000,
+        summary_words: int = 500
+    ):
 
-    tool_message = ToolMessage(content=text, tool_call_id=uuid4())
-    
-    system_prompt = f"""Analyze the provided content focusing on keywords: "{'keyword'}" and purpose: "{'purpose'}".
-    Extract key information that directly relates to these keywords and serves the stated purpose.
-    Summarize the most relevant points in {summary_words} words or less.
-    Respond in the same language as the input content. /no_think"""
-
-    system_message = SystemMessage(system_prompt)
-
-    messages = [tool_message, system_message]
-    async for data in parse_astream(llm_astream, messages):
-        _, text = parse_qwen3_text(data["content"])
+    if len(text) < max_len:
         yield text
+    
+    else:
+        tool_message = ToolMessage(content=text, tool_call_id=uuid4())
+        
+        system_prompt = f"""**Content Analysis:**
+        - Focus on keywords: "{'keyword'}" and purpose: "{'purpose'}"
+        - Extract directly relevant information
+        
+        **Preservation Guidelines:**
+        - Maintain original wording and specific details
+        - Prioritize accuracy over brevity
+        - Retain essential context
+        
+        **Summary Requirements:**
+        - Structure: Main topic → core points → key insight
+        - Length: {summary_words} words or less
+        - Match language and tone to audience /no_think"""
+
+        system_message = SystemMessage(system_prompt)
+
+        messages = [tool_message, system_message]
+        async for data in parse_astream(llm_astream, messages):
+            _, text = parse_qwen3_text(data["content"])
+            yield text

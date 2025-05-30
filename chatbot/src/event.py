@@ -1,13 +1,13 @@
 from uuid import uuid4
-from typing import List, Tuple, AsyncGenerator
+from typing import List, Dict, Tuple, AsyncGenerator
 from gradio import ChatMessage
 from langchain_core.messages import ToolMessage
 
 from .chat import MessageCollector, history_to_langchain, slice_messages
-from .message import init_astream, parse_astream, build_system_message
+from .message import init_astream, parse_astream
 from .qwen import create_qwen3_chat_messages, create_qwen3_tool_messages
 from .tool import run_tool, stream_summary
-from .config import cfg_mcp
+from .config import cfg_mcp, system_prompt_no_think, system_prompt_think
 from .misc import str_to_obj, State
 
 
@@ -33,11 +33,12 @@ def add_user_message(
 async def add_ai_message(
     chat_history: List[ChatMessage], 
     do_think: bool, 
-    state: State
+    state: State,
+    chat_info: Dict[str, int]
 ) -> AsyncGenerator[List[ChatMessage], None]:
 
     if not chat_history:
-        yield chat_history
+        yield chat_history, chat_info
         return
 
     # initialize
@@ -45,11 +46,11 @@ async def add_ai_message(
     llm_astream, tool_astream = await init_astream()
 
     # prepare message
-    system_message = build_system_message(do_think=do_think)
+    system_message = system_prompt_think if do_think else system_prompt_no_think
     chat_messages = [m for m in chat_history if m.get("metadata") is None]
 
     messages = history_to_langchain(chat_messages) + [system_message]
-    chat_messages, system_messages = slice_messages(messages)
+    system_messages, chat_messages, chat_info = slice_messages(messages, chat_info)
     messages = chat_messages + system_messages
 
     # tool_astream
@@ -72,13 +73,13 @@ async def add_ai_message(
             collector.update(think_messages, mtype="think_1")
             collector.update(ai_messages, mtype="ai")
             collector.update(tool_messages, mtype="tool")
-            yield collector(chat_history)
+            yield collector(chat_history), chat_info
 
         except: break
 
     for message in collector.messages["think_1"]:
         message.metadata["status"] = "done"
-    yield collector(chat_history)
+    yield collector(chat_history), chat_info
 
     # llm_astream
     if collector.check_tool() and tool_calls:
@@ -97,17 +98,17 @@ async def add_ai_message(
                 async for text in astream:
                     if init_state != state.value: break
                     tool_message.content = text
-                    yield collector(chat_history)
+                    yield collector(chat_history), chat_info
 
             except: continue
 
         for message in collector.messages["tool"]:
             message.metadata["status"] = "done"
-        yield collector(chat_history)
+        yield collector(chat_history), chat_info
 
         # answer
         messages.extend([ToolMessage(m.content, tool_call_id=uuid4()) for m in tool_messages])
-        chat_messages, system_messages = slice_messages(messages)
+        system_messages, chat_messages, chat_info = slice_messages(messages, chat_info)
         messages = chat_messages + system_messages
 
         async for data in parse_astream(llm_astream, messages):
@@ -120,10 +121,10 @@ async def add_ai_message(
 
                 collector.update(think_messages, mtype="think_2")
                 collector.update(ai_messages, mtype="ai")
-                yield collector(chat_history)
+                yield collector(chat_history), chat_info
 
             except: break
 
         for message in collector.messages["think_2"]:
             message.metadata["status"] = "done"
-        yield collector(chat_history)
+        yield collector(chat_history), chat_info

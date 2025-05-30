@@ -9,7 +9,7 @@ set MODEL_NAME=Qwen3-4B
 set MAX_LEN=10240
 set HOST_PORT=8000
 set CONTAINER_PORT=8000
-set DOCKER_IMAGE=vllm/vllm-openai:latest
+set DOCKER_IMAGE=vllm/vllm-openai:v0.9.0
 set CONTAINER_NAME=vllm-server
 set GPU_MEMORY_UTIL=0.9
 set MAX_NUM_SEQS=256
@@ -128,8 +128,8 @@ echo.
 echo [4/7] Checking if port %HOST_PORT% is available...
 wsl -d %WSL_DISTRO% -- bash -c "ss -tuln | grep ':%HOST_PORT% '"
 if %ERRORLEVEL% EQU 0 (
-    echo [FAILED] Port %HOST_PORT% is already in use
-    echo [INFO] Please stop the service using port %HOST_PORT% or change HOST_PORT variable
+    echo [FAILED] Port %HOST_PORT% is still in use
+    echo [INFO] Please wait a moment for port to be released or change HOST_PORT variable
     echo.
     pause
     exit /b 1
@@ -167,7 +167,6 @@ echo - Port Mapping: %HOST_PORT%:%CONTAINER_PORT%
 echo - GPU Memory: %GPU_MEMORY_UTIL%
 echo - Max Sequences: %MAX_NUM_SEQS%
 echo - Tensor Parallel: %TENSOR_PARALLEL%
-echo - Applied Flags: %TRUST_FLAG% %TOOL_CHOICE_FLAG% %TOOL_PARSER_FLAG% %LOG_STATS_FLAG% %LOG_REQUESTS_FLAG%
 echo.
 echo ========================================
 echo           Server Information
@@ -176,9 +175,6 @@ echo Server URL:  http://localhost:%HOST_PORT%
 echo API Docs:    http://localhost:%HOST_PORT%/docs
 echo Health:      http://localhost:%HOST_PORT%/health
 echo Models:      http://localhost:%HOST_PORT%/v1/models
-echo Model:       %MODEL_NAME%
-echo Max Length:  %MAX_LEN% tokens
-echo Container:   %CONTAINER_NAME%
 echo ========================================
 echo.
 echo [INFO] Server will start now and run in foreground

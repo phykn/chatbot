@@ -1,12 +1,9 @@
 from typing import List, Dict, Tuple
 from copy import deepcopy
 from gradio import ChatMessage
-from langchain_core.messages import (
-    BaseMessage,
-    HumanMessage, 
-    AIMessage
-)
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from .config import tokenizer, cfg_llm
+from .misc import hash
 
 
 class MessageCollector:
@@ -40,40 +37,62 @@ def history_to_langchain(history: List[Dict[str, str]]) -> List[BaseMessage]:
 
 def slice_messages(
     messages: List[BaseMessage],
-    eps: int = 8
-) -> Tuple[List[BaseMessage], List[BaseMessage]]:
+    chat_info: Dict[str, int]
+) -> Tuple[List[BaseMessage], List[BaseMessage], Dict[str, int]]:
     """Slice messages to fit within token limit while preserving system message."""
     
     if not messages:
         return messages
     
-    system_messages = []
-    chat_messages = []
-
+    # split messages
+    system_messages, chat_messages = [], []
     for message in messages:
         if message.type == "system":
             system_messages.append(message)
         else:
             chat_messages.append(message)
 
-    system_tokens = sum([len(tokenizer.encode(m.content)) + eps for m in system_messages])
+    # system messages
+    system_tokens = []
+    for message in system_messages:
+        content = message.content
+        key = hash(content)
 
+        if key not in chat_info:
+            tokens = len(tokenizer.encode(content))
+            chat_info[key] = tokens
+        else:
+            tokens = chat_info[key]
+
+        system_tokens.append(tokens)
+    system_tokens = sum(system_tokens)
+
+    # get allow tokens
     max_input_tokens = cfg_llm["max_input_tokens"]
     allow_tokens = max_input_tokens - system_tokens
     
-    selected_messages = []
+    # chat messages
     total_tokens = 0
+    selected_messages = []    
 
     for i in range(len(chat_messages) - 1, -1, -1):
         message = chat_messages[i]
-        chat_tokens = len(tokenizer.encode(message.content)) + eps
-        total_tokens += chat_tokens
-        
+
+        content = message.content
+        key = hash(content)
+
+        if key not in chat_info:
+            tokens = len(tokenizer.encode(content))
+            chat_info[key] = tokens
+        else:
+            tokens = chat_info[key]
+
+        total_tokens += tokens
+
         if total_tokens > allow_tokens:
             break
 
         selected_messages.append(chat_messages[i])
 
     selected_messages.reverse()
-
-    return selected_messages, system_messages
+    return system_messages, selected_messages, chat_info

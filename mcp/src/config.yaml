@@ -1,0 +1,5 @@
+web_search:
+  region: "wt-wt"
+  max_results: 5
+  num_token_page: 2000
+  num_token_limit: 8000

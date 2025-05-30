@@ -4,4 +4,5 @@ server:
   transport: "sse"
 
 summary:
+  max_len: 2000
   summary_words: 500

@@ -1,7 +1,7 @@
 import argparse
 from fastmcp import FastMCP
 from src.search import ddg_search
-from src.misc import obj_to_str
+from src.misc import obj_to_str, load_yaml
 
 
 def create_parser():
@@ -13,35 +13,30 @@ def create_parser():
 
 
 mcp = FastMCP("MCP Server")
+cfg = load_yaml("src/config.yaml")
 
 
 @mcp.tool()
-async def web_search(keyword: str, purpose: str = "") -> str:
-    """Search the web for current information and recent updates.
-    
+async def web_search(keyword: str, purpose: str) -> str:
+    """Search web for current information beyond training data.
+
     Args:
-        keyword (str): Search terms or query to find relevant information
-        purpose (str, optional): Context or intent of the search to improve result relevance
-    
+        keyword (str): Search query terms
+        purpose (str): Search intent for better filtering
+
     Returns:
-        str: Search results content including article text and relevant information
+        str: Relevant search results content
     """
 
-    content = ddg_search(
-        keywords = keyword,
-        region = "wt-wt",
-        max_results = 10,
-        num_token_page = 2000,
-        num_token_limit = 8000
-    )
-
-    output = {
-        "keyword": keyword,
-        "purpose": purpose,
-        "content": content
-    }
+    try:
+        return obj_to_str({
+            "keyword": keyword,
+            "purpose": purpose,
+            "content": ddg_search(keyword, **cfg["web_search"])
+        })
     
-    return obj_to_str(output)
+    except:
+        return "Not available"
 
 
 if __name__ == "__main__":

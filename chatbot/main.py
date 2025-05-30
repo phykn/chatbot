@@ -2,7 +2,7 @@ import argparse
 import gradio as gr
 from src.config import CSS_AVATAR
 from src.event import add_user_message, add_ai_message
-from src.misc import load_yaml, State, update_state
+from src.misc import State, update_state
 
 
 with gr.Blocks(
@@ -12,6 +12,7 @@ with gr.Blocks(
     
     do_think = gr.State(False)
     state = gr.State(State())
+    chat_info = gr.State({})
 
     chat_history = gr.Chatbot(
         type = "messages",
@@ -59,9 +60,13 @@ with gr.Blocks(
         outputs = [chat_history, user_input]
     ).then(
         fn = add_ai_message,
-        inputs = [chat_history, do_think, state],
-        outputs = chat_history,
+        inputs = [chat_history, do_think, state, chat_info],
+        outputs = [chat_history, chat_info],
         queue = True
+    ).then(
+        fn = lambda x: x,
+        inputs = chat_info,
+        outputs = chat_info
     )
 
     stop_btn.click(
@@ -78,6 +83,9 @@ with gr.Blocks(
     clear_btn.click(
         fn = lambda: [],
         outputs = chat_history,
+    ).then(
+        fn = lambda: {},
+        outputs = chat_info
     )
 
 
